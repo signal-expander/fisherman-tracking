@@ -12,6 +12,9 @@ const gpsPointsSchema = new mongoose.Schema({
     longitude: {
         type: String,
         required: true
+    },
+    node_time: {
+        type: String
     }
 }, {
     timestamps: {

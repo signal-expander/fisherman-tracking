@@ -8,17 +8,20 @@ const cors = require('cors');
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 
+const app = express();
+const http = require('http').createServer(app);
+const io = require('socket.io')(http);
+const socketHandler = require('./socketHandler');
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(cookieParser());
+
 const userRoutes = require('./routes/userRoutes');
 const fishermanRoutes = require('./routes/fishermanRoutes');
 const globalErrHandler = require('./controllers/errorController');
 const AppError = require('./utils/appError');
-
-const app = express();
-const http = require('http').createServer(app);
-const io = require('socket.io')(http);
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-app.use(cookieParser());
+const fishermanController = require('./controllers/fishermanController');
 
 // Allow Cross-Origin requests
 app.use(cors());
@@ -53,6 +56,22 @@ app.use(cors());
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/fisherman', fishermanRoutes);
 
+app.post('/api/v1/fisherman/save-gps-data', (req, res) => {
+
+    console.log("-- hello world --");
+    fishermanController.savePostGpsData(req, res, (params) => {
+        console.log("-- hello i'm a callback function --", params);
+        if (params.status === 500)
+            res.status(500).send("failed");
+
+
+
+            
+
+        res.status(200).send("success");
+    });
+});
+
 io.use(function (socket, next) {
     // let token = ''; 
     // let section = '';
@@ -70,12 +89,6 @@ io.use(function (socket, next) {
     //     }
     // });
 
-    // res.header("Access-Control-Allow-Origin", "*");
-    // res.header("Access-Control-Allow-Headers", "X-Requested-With");
-    // res.header("Access-Control-Allow-Headers", "Content-Type");
-    // res.header("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, OPTIONS");
-    // next();
-
     // socketHandler.auth_user(socket, { token, section }, () => {
     //     next();
     // });
@@ -84,10 +97,10 @@ io.use(function (socket, next) {
 }).on('connection', (socket) => {
 
     socket.on(`msg_send`, (params) => {
-        console.log("msg ->", params);
-
-        io.emit(`msg_recv`, { hello: "universe" })
-
+        socketHandler.addGpsPoints(params, () => {
+            console.log("-- handler response --");
+            io.emit(`msg_recv`, { hello: "universe" })
+        });
     });
 
     // // teacher request - done
