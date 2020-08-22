@@ -5,12 +5,23 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const cors = require('cors');
+const bodyParser = require("body-parser");
+const cookieParser = require('cookie-parser');
 
+const app = express();
+const http = require('http').createServer(app);
+const io = require('socket.io')(http);
+const socketHandler = require('./socketHandler');
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(cookieParser());
 
 const userRoutes = require('./routes/userRoutes');
+const fishermanRoutes = require('./routes/fishermanRoutes');
 const globalErrHandler = require('./controllers/errorController');
 const AppError = require('./utils/appError');
-const app = express();
+const fishermanController = require('./controllers/fishermanController');
 
 // Allow Cross-Origin requests
 app.use(cors());
@@ -43,6 +54,73 @@ app.use(cors());
 
 // Routes
 app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/fisherman', fishermanRoutes);
+
+app.post('/api/v1/fisherman/save-gps-data', (req, res) => {
+
+    console.log("-- hello world --");
+    fishermanController.savePostGpsData(req, res, (params) => {
+        console.log("-- hello i'm a callback function --", params);
+        if (params.status === 500)
+            res.status(500).send("failed");
+
+
+
+            
+
+        res.status(200).send("success");
+    });
+});
+
+io.use(function (socket, next) {
+    // let token = ''; 
+    // let section = '';
+    // socket.handshake.headers.cookie.split(';').map((d) => {
+    //     const temp = d.split('=');
+    //     switch (temp[0].trim()) {
+    //         case 'token':
+    //             token = temp[1];
+    //             break;
+    //         case 'section':
+    //             section = decodeURI(temp[1]).split("\"")[1];
+    //             break;
+    //         default:
+    //             break;
+    //     }
+    // });
+
+    // socketHandler.auth_user(socket, { token, section }, () => {
+    //     next();
+    // });
+    next();
+
+}).on('connection', (socket) => {
+
+    socket.on(`msg_send`, (params) => {
+        socketHandler.addGpsPoints(params, () => {
+            console.log("-- handler response --");
+            io.emit(`msg_recv`, { hello: "universe" })
+        });
+    });
+
+    // // teacher request - done
+    // socket.on(`reqSms_${socket.user._id}`, (params) => {
+    //     socketHandler.checkConversation(socket, params, (data) => {
+    //         socket.emit(`reqSms_${socket.user._id}`, data);
+    //     });
+    // });
+
+    // // student request - done
+    // socket.on(`reqSmsStudent_${socket.user._id}`, () => {
+    //     socketHandler.checkConversation(socket, { student_id: socket.user._id, section_id: socket.section }, (data) => {
+    //         socket.emit(`reqSmsStudent_${socket.user._id}`,data);
+    //     });
+    // });
+
+});
+
+
+
 
 
 
@@ -55,4 +133,4 @@ app.use('*', (req, res, next) => {
 
 app.use(globalErrHandler);
 
-module.exports = app;
+module.exports = http;
