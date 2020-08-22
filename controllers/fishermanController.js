@@ -75,12 +75,8 @@ exports.savePostGpsData = async (req, res, next) => {
 
         console.log("body -> ", req.body);
 
-
-        //res.status(200).send("ok");
-        next({ status: 200 })
-
+        next({ status: 200 });
     } catch (err) {
         next({ status: 500 });
     }
 };
-//  -> 62546770

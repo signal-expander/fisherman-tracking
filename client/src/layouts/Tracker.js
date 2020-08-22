@@ -15,17 +15,15 @@ $(document).ready(function () {
 class Tracker extends Component {
     render() {
         return (
-            <div>
-
-
+            <>
                 <div class="wrapper">
                     <nav id="sidebar">
                         <div class="sidebar-header">
-                            <h3>Dashboard</h3>
-                            <hr/>
-                            <h5><span style={{color: "aquamarine"}}>Name:</span> Jay Reymark Jalandoni</h5>
+                                <h3>Dashboard</h3>
+                            <hr />
+                            <h5><span style={{ color: "aquamarine" }}>Name:</span> Jay Reymark Jalandoni</h5>
                         </div>
-                        <ul class="list-unstyled components ml-2">
+                        <ul class="list-unstyled components">
                             <li>
                                 <a href="#">Home</a>
                             </li>
@@ -35,33 +33,11 @@ class Tracker extends Component {
                         </ul>
                     </nav>
 
-                    <div id="content">
-                        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-                            <div class="container-fluid">
-
-                                <button type="button" id="sidebarCollapse" class="navbar-btn">
-                                    <span></span>
-                                    <span></span>
-                                    <span></span>
-                                </button>
-
-                            </div>
-                        </nav>
-                    </div>
-
-                    <div className="col-md-8 mt-5 p-0" >
+                    <div id="content">        
                         <MapPage />
                     </div>
-
                 </div>
-
-
-
-
-
-
-
-            </div>
+            </>
         );
     }
 }

@@ -64,10 +64,11 @@ app.post('/api/v1/fisherman/save-gps-data', (req, res) => {
         if (params.status === 500)
             res.status(500).send("failed");
 
-
-
+        
+        
+        
+        io.emit(`msg_recv`, { test_emit: "-- test emit from api --" });
             
-
         res.status(200).send("success");
     });
 });
