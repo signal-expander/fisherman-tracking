@@ -1,7 +1,16 @@
 import React, { Component } from 'react';
 import MapPage from '../pages/MapPage/MapPage';
-import Sidebar from 'react-sidebar';
+import './tracker.css';
+import $ from "jquery";
 
+
+$(document).ready(function () {
+    $('#sidebarCollapse').on('click', function () {
+        $('#sidebar').toggleClass('active');
+        $(this).toggleClass('active');
+    });
+
+});
 
 class Tracker extends Component {
     render() {
@@ -9,28 +18,49 @@ class Tracker extends Component {
             <div>
 
 
-
-
-
-                <div className="container-fluid ">
-                    <div className="row">
-                        <div className="col-md-4 vh-100 p-0 text-center bg-warning">
-                          {/* SideBar here
-
-                            <div className="card border-success mb-3 mx-3 mt-3">
-                                <div className="card-body text-success">
-                                    <h5 className="card-title">Test Fisherman Name</h5>
-                                    <p className="card-text">Test Content</p>
-                                </div>
-                            </div>  */}
-                            
-                        </div> 
-                        
-                        <div className="col-md-8 mt-4 p-0">
-                            <MapPage />
+                <div class="wrapper">
+                    <nav id="sidebar">
+                        <div class="sidebar-header">
+                            <h3>Dashboard</h3>
+                            <hr/>
+                            <h5><span style={{color: "aquamarine"}}>Name:</span> Jay Reymark Jalandoni</h5>
                         </div>
+                        <ul class="list-unstyled components ml-2">
+                            <li>
+                                <a href="#">Home</a>
+                            </li>
+                            <li>
+                                <a href="#">Contents</a>
+                            </li>
+                        </ul>
+                    </nav>
+
+                    <div id="content">
+                        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                            <div class="container-fluid">
+
+                                <button type="button" id="sidebarCollapse" class="navbar-btn">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </button>
+
+                            </div>
+                        </nav>
                     </div>
+
+                    <div className="col-md-8 mt-5 p-0" >
+                        <MapPage />
+                    </div>
+
                 </div>
+
+
+
+
+
+
+
             </div>
         );
     }
