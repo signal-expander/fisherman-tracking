@@ -37,10 +37,12 @@ a, a:hover, a:focus {
 #sidebar {
     background: #494D5F;
     color: #fff;
+    height: 100vh;
     transition: all 0.3s;
     min-width: 250px;
     max-width: 250px;
     min-height: 100vh;
+    overflow: scroll;
 }
 
 #sidebar .sidebar-header {

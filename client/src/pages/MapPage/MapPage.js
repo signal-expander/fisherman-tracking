@@ -6,7 +6,8 @@ import leafShadow from './icons/leaf-shadow.png';
 import openSocket from 'socket.io-client';
 import LeafletReactTrackPlayer from "leaflet-react-track-player";
 import demo from './demo';
-// import LeafletPolyline from 'react-leaflet-polyline'
+import { IoIosRemove, IoIosAdd } from "react-icons/io";
+import { FishermanInfo } from '../../components';
 
 const redIcon = L.icon({
     iconUrl: leafRed,
@@ -32,6 +33,8 @@ class MapPage extends Component {
             gpsData: [demo[0]],
             icon: "/img/mech.svg",
             latLngHold: { lat: 0.0, lng: 0.0 },
+            followMovement: true,
+            showFishermanInfo: true,
 
             // test var
             numInc: 0,
@@ -46,6 +49,9 @@ class MapPage extends Component {
     componentDidMount() {
         this.receivedSocketIO();
         console.log("socket ->", this.socket);
+
+        console.log("props ->", this.props.fisherman);
+
     }
 
     componentWillUnmount = () => {
@@ -85,7 +91,30 @@ class MapPage extends Component {
         });
     }
 
+    changeMovementCheck = (e) => {
+        this.setState({ followMovement: e.target.checked });
+    }
+
+    increaseZoom = () => {
+        if (this.state.zoom < 20)
+            this.setState({ zoom: this.state.zoom + 1 });
+    }
+
+    decreaseZoom = () => {
+        if (this.state.zoom > 0)
+            this.setState({ zoom: this.state.zoom - 1 });
+    }
+
+    showFishermanInfoHandler = () => {
+        this.setState({ showFishermanInfo: true });
+    }
+
     render() {
+
+        const initPos = [
+            this.state.gpsData[0].lat,
+            this.state.gpsData[0].lng];
+
         const position = [
             this.state.gpsData[this.state.gpsData.length - 1].lat,
             this.state.gpsData[this.state.gpsData.length - 1].lng];
@@ -96,7 +125,7 @@ class MapPage extends Component {
                 paddingRight: "0px",
                 paddingLeft: "0px"
             }}>
-                <div style={{ position: "absolute", zIndex: 9999 }}>
+                <div style={{ position: "absolute", zIndex: 999 }}>
                     <div className="p-2" style={{
                         width: "100%",
                         marginTop: "12px",
@@ -109,30 +138,62 @@ class MapPage extends Component {
                                 <span></span>
                                 <span></span>
                             </button>
+
+                            <div className="btn-group mx-1" role="group" aria-label="Basic example">
+                                <button 
+                                    type="button"
+                                    onClick={this.decreaseZoom} 
+                                    className="btn btn-dark"><IoIosRemove/></button>
+                                <button 
+                                    type="button"
+                                    onClick={this.increaseZoom}
+                                    className="btn btn-dark"><IoIosAdd/></button>
+                            </div>
+
                             <button type="button"
                                 className="btn btn-sm btn-info mx-1"
                                 onClick={this.sendHandler}>socket-test</button>
                             <button type="button"
                                 className="btn btn-sm btn-primary mx-1"
                                 onClick={this.testMove}>move-test</button>
+                            
+                            <button type="button"
+                                className="btn btn-sm btn-info mx-1"
+                                onClick={this.showFishermanInfoHandler}>Show Info</button>
 
-                            <div class="custom-control custom-switch my-auto text-white rounded-pill mx-1 bg-secondary">
+                            <div className="custom-control custom-switch my-auto py-1 text-white rounded-pill mx-1 bg-secondary">
+                                &nbsp;&nbsp;
                                 <input type="checkbox"
+                                    onChange={this.changeMovementCheck}
+                                    defaultChecked={this.state.followMovement}
                                     className="custom-control-input"
-                                    id="customSwitch1" />
+                                    id="followMovementCheck" />
                                 <label
                                     className="custom-control-label"
-                                    for="customSwitch1">
-                                    Follow Movement
+                                    for="followMovementCheck">
+                                    Follow Movement&nbsp;&nbsp;
                                 </label>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                {
+                    this.state.showFishermanInfo &&
+                        <FishermanInfo 
+                            fisherman={this.props.fisherman}
+                            currentLoc={position}
+                            onClose={() => {
+                                this.setState({ showFishermanInfo: false })
+                            }} 
+                        />
+                }
+                
                 <Map
                     style={{ height: "100%", width: "100%" }}
-                    center={position}
+                    center={
+                        this.state.followMovement ? position : initPos
+                    }
                     zoom={this.state.zoom}
                     zoomControl={false}
                 >
@@ -175,7 +236,7 @@ class MapPage extends Component {
                         }
                         icon={redIcon}
                     >
-                        <Popup><br /> First Position <br /></Popup>
+                        <Popup>First Position <br /></Popup>
                     </Marker>
 
                     <Marker
@@ -187,7 +248,7 @@ class MapPage extends Component {
                         }
                         icon={redIcon}
                     >
-                        <Popup><br /> Last Position <br /></Popup>
+                        <Popup>Last Position <br /></Popup>
                     </Marker>
                 </Map>
             </div>
