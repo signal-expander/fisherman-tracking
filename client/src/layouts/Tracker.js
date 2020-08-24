@@ -28,7 +28,8 @@ class Tracker extends Component {
                 submitting: false
             },
             fishermen: [],
-            selectedFisherman: {}
+            selectedFisherman: {},
+            gpsData: []
         };
     }
 
@@ -38,15 +39,12 @@ class Tracker extends Component {
 
     fetchFishermanData = async () => {
         await fishermenService.getFishermenList((res) => {
-            console.log("res -> ", res);
             this.setState({
                 fishermen: res.data,
                 selectedFisherman: res.data[0]
-            }, () => {
-                
-                console.log("data -> ", this.state);
-
             });
+
+            this.fetchFishermanGPSPoints(res.data[0]);
         }, (err) => {
             this.setState({
                 toastData: {
@@ -87,6 +85,25 @@ class Tracker extends Component {
         });
     }
 
+    fetchFishermanGPSPoints = async (data) => {
+        await fishermenService.fetchGPSFishermanData(data._id, (resp) => {
+            console.log("resp ->", resp.data.data);
+            this.setState({ selectedFisherman: data, gpsData: resp.data.data });
+        }, (err) => {
+            this.setState({
+                toastData: {
+                    title: "Error Fetch GPS Data",
+                    msg: err,
+                    open: true
+                }
+            });
+        });
+    }
+
+    setFishermanGpsData = (data) => {
+        this.fetchFishermanGPSPoints(data);
+    }
+
     showSaveFishermanModal = () => {
         $('#saveFisherman').modal('show');
     }
@@ -120,9 +137,7 @@ class Tracker extends Component {
                             {
                                 (this.state.fishermen || []).map((data) =>
                                     <li>
-                                        <a href="#" onClick={() => 
-                                            this.setState({ selectedFisherman: data })
-                                        }>
+                                        <a href={`#${data.id_number}`} onClick={() => this.setFishermanGpsData(data)}>
                                             { data.name } <br/>
                                             <small className="text-warning">&nbsp;ID Number: { data.id_number } </small>
                                         </a>
@@ -135,6 +150,7 @@ class Tracker extends Component {
                     <div id="content">
                         <MapPage
                             fisherman={this.state.selectedFisherman}
+                            gpsData={this.state.gpsData}
                         />
                     </div>
                 </div>

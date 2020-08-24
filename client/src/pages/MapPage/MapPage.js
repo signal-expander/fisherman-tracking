@@ -8,6 +8,7 @@ import LeafletReactTrackPlayer from "leaflet-react-track-player";
 import demo from './demo';
 import { IoIosRemove, IoIosAdd } from "react-icons/io";
 import { FishermanInfo } from '../../components';
+import { timers } from 'jquery';
 
 const redIcon = L.icon({
     iconUrl: leafRed,
@@ -30,12 +31,15 @@ class MapPage extends Component {
             },
             zoom: 13,
             type: "distance",
-            gpsData: [demo[0]],
+            gpsData: [{
+                lat: 14.5833,
+                lng: 121.0000
+            }],
             icon: "/img/mech.svg",
             latLngHold: { lat: 0.0, lng: 0.0 },
             followMovement: true,
             showFishermanInfo: true,
-
+            socketGpsTopic: '',
             // test var
             numInc: 0,
         }
@@ -46,21 +50,46 @@ class MapPage extends Component {
         this.mapRef = createRef();
     }
 
-    componentDidMount() {
+    componentWillMount() {
         this.receivedSocketIO();
-        console.log("socket ->", this.socket);
-
-        console.log("props ->", this.props.fisherman);
-
     }
 
     componentWillUnmount = () => {
         this.disconnectSockerIO();
     }
 
+    componentDidUpdate = (prevProps, prevState) => {
+        if (this.props.fisherman._id != this.state.socketGpsTopic) {
+            const id = this.props.fisherman._id;
+            
+            this.setState({ socketGpsTopic: id });
+        }
+
+        if (this.props.gpsData != this.state.gpsData) {
+            const gps = this.props.gpsData;
+
+            if (gps.length < 2) {
+                gps.push({
+                    lat: 14.5833,
+                    lng: 121.0000
+                });
+            }
+
+            this.setState({ gpsData: gps });
+        }
+    }
+
     receivedSocketIO = () => {
         this.socket.on(`msg_recv`, (msg) => {
             console.log("msg -> ", msg);
+        });
+
+        this.socket.on(`plot_gps`, (data) => {
+            if (data.id == this.state.socketGpsTopic) {
+                console.log("data -> ", data);
+
+                this.setState({ gpsData: data.gps });
+            }
         });
     }
 
@@ -112,12 +141,12 @@ class MapPage extends Component {
     render() {
 
         const initPos = [
-            this.state.gpsData[0].lat,
-            this.state.gpsData[0].lng];
+            parseFloat(this.state.gpsData[0]?.lat),
+            parseFloat(this.state.gpsData[0]?.lng)]
 
         const position = [
-            this.state.gpsData[this.state.gpsData.length - 1].lat,
-            this.state.gpsData[this.state.gpsData.length - 1].lng];
+            parseFloat(this.state.gpsData[this.state.gpsData.length - 1]?.lat),
+            parseFloat(this.state.gpsData[this.state.gpsData.length - 1]?.lng)];
 
         return (
             <div className="container-fluid" style={{
@@ -203,36 +232,36 @@ class MapPage extends Component {
                     />
 
                     {
-                        (this.state.gpsData || []).map((points, key) => {
+                            (this.state.gpsData || []).map((points, key) => {
 
-                            let from = { lat: position[0], lng: position[1] };
-                            let to = { lat: position[0], lng: position[1] };
+                                let from = { lat: parseFloat(position[0]), lng: parseFloat(position[1]) };
+                                let to = { lat: parseFloat(position[0]), lng: parseFloat(position[1]) };
 
-                            if (key == 0) {
-                                from = { lat: points.lat, lng: points.lng };
-                                to = { lat: points.lat, lng: points.lng };
-                            } else {
-                                from = {
-                                    lat: this.state.gpsData[key - 1].lat,
-                                    lng: this.state.gpsData[key - 1].lng
-                                };
-                                to = {
-                                    lat: this.state.gpsData[key].lat,
-                                    lng: this.state.gpsData[key].lng
-                                };
-                            }
+                                if (key == 0) {
+                                    from = { lat: parseFloat(points?.lat), lng: parseFloat(points?.lng) };
+                                    to = { lat: parseFloat(points?.lat), lng: parseFloat(points?.lng) };
+                                } else {
+                                    from = {
+                                        lat: parseFloat(this.state.gpsData[key - 1]?.lat),
+                                        lng: parseFloat(this.state.gpsData[key - 1]?.lng)
+                                    };
+                                    to = {
+                                        lat: parseFloat(this.state.gpsData[key]?.lat),
+                                        lng: parseFloat(this.state.gpsData[key]?.lng)
+                                    };
+                                }
 
-                            return (
-                                <Polyline key={key} positions={[
-                                    [from.lat, from.lng], [to.lat, to.lng],
-                                ]} color={'red'} />
-                            )
-                        })
+                                return (
+                                    <Polyline key={key} positions={[
+                                        [from.lat, from.lng], [to.lat, to.lng],
+                                    ]} color={'red'} />
+                                )
+                            })
                     }
 
                     <Marker
                         position={
-                            [this.state.gpsData[0].lat, this.state.gpsData[0].lng]
+                            [this.state.gpsData[0]?.lat, this.state.gpsData[0]?.lng]
                         }
                         icon={redIcon}
                     >
@@ -242,8 +271,8 @@ class MapPage extends Component {
                     <Marker
                         position={
                             [
-                                this.state.gpsData[this.state.gpsData.length - 1].lat,
-                                this.state.gpsData[this.state.gpsData.length - 1].lng
+                                this.state.gpsData[this.state.gpsData.length - 1]?.lat,
+                                this.state.gpsData[this.state.gpsData.length - 1]?.lng
                             ]
                         }
                         icon={redIcon}

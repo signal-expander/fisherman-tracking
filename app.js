@@ -56,19 +56,13 @@ app.use(cors());
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/fisherman', fishermanRoutes);
 
-app.post('/api/v1/fisherman/save-gps-data', (req, res) => {
-
-    console.log("-- hello world --");
-    fishermanController.savePostGpsData(req, res, (params) => {
-        console.log("-- hello i'm a callback function --", params);
+// request from esp
+app.get('/api/v1/esp/save-gps', (req, res) => {
+    fishermanController.saveEspGpsData(req, res, (params) => {
         if (params.status === 500)
-            res.status(500).send("failed");
+            return res.status(500).send("failed");
 
-        
-        
-        
-        io.emit(`msg_recv`, { test_emit: "-- test emit from api --" });
-            
+        io.emit(`plot_gps`, params);
         res.status(200).send("success");
     });
 });
@@ -119,10 +113,6 @@ io.use(function (socket, next) {
     // });
 
 });
-
-
-
-
 
 
 

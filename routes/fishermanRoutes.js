@@ -12,6 +12,9 @@ router.route("/get-all-fisherman")
 router.route("/save-gps-data")
     .get(fishermanController.saveGpsData);
 
+router.route("/fetch-gps-data")
+    .post(fishermanController.fetchGpsData);
+
 // router.route("/save-gps-data")
 //     .post(fishermanController.savePostGpsData);
 

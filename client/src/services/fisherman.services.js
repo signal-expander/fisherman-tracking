@@ -3,7 +3,8 @@ import axios from 'axios';
 
 export const fishermenService = {
     getFishermenList,
-    saveFishermanData
+    saveFishermanData,
+    fetchGPSFishermanData
 }
 
 async function getFishermenList(success, error) {
@@ -14,7 +15,7 @@ async function getFishermenList(success, error) {
     catch (err) {
         error(err + "");
     }
-}
+};
 
 async function saveFishermanData(form, success, error) {
     try {
@@ -23,5 +24,15 @@ async function saveFishermanData(form, success, error) {
     }
     catch (err) {
         error(err.message);
+    }
+};
+
+async function fetchGPSFishermanData(id, success, error) {
+    try {
+        const resp = await axios.post('/api/v1/fisherman/fetch-gps-data', { id });
+        success(resp);
+    } 
+    catch (err) {
+        error(err + "");
     }
 }

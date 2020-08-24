@@ -58,8 +58,8 @@ exports.saveGpsData = async (req, res, next) => {
 
         await gpsPointsModel.create({
             fisherman_id: fisherman.id,
-            latitude: lat,
-            longitude: long,
+            lat: lat,
+            lng: long,
             node_time: datetime
         }); */
     
@@ -70,12 +70,46 @@ exports.saveGpsData = async (req, res, next) => {
     }
 }
 
-exports.savePostGpsData = async (req, res, next) => {
+exports.fetchGpsData = async (req, res, next) => {
     try {
+        const { id } = req.body;
 
-        console.log("body -> ", req.body);
+        const fishermanPts = await gpsPointsModel
+                        .find({ fisherman_id: id })
+                        .sort({ created_at: 1 });
 
-        next({ status: 200 });
+        res.status(200).json({
+            status: "success",
+            data: fishermanPts
+        });
+    } catch (err) {
+        next(err);
+    }
+}
+
+/** Socket */
+exports.saveEspGpsData = async (req, res, next) => {
+    try {
+        const { node_id, lat, long, datetime } = req.query;
+        // console.log("query : ", node_id, " > ", lat, " > ", long, " > ", datetime);
+
+        const fisherman = await fishermanModel.findOne({ id_number: node_id });
+
+        if (!fisherman) {
+            next({ status: 500 });
+        } else {
+            await gpsPointsModel.create({
+                fisherman_id: fisherman.id,
+                lat: lat,
+                lng: long,
+                node_time: datetime
+            });
+
+            const fishermanPts = await gpsPointsModel
+                                            .find({ fisherman_id: fisherman.id })
+                                            .sort({ created_at: 1 });
+            next({ status: 200, gps: fishermanPts, id: fisherman.id });
+        }
     } catch (err) {
         next({ status: 500 });
     }
