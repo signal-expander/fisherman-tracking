@@ -35,11 +35,14 @@ class MapPage extends Component {
                 lat: 14.5833,
                 lng: 121.0000
             }],
+            realTimeGps: [[0, 0]],
+            initPos: [0, 0],
             icon: "/img/mech.svg",
             latLngHold: { lat: 0.0, lng: 0.0 },
             followMovement: true,
             showFishermanInfo: true,
             socketGpsTopic: '',
+            gpsLastPoint: [0, 0],
             // test var
             numInc: 0,
         }
@@ -61,21 +64,18 @@ class MapPage extends Component {
     componentDidUpdate = (prevProps, prevState) => {
         if (this.props.fisherman._id != this.state.socketGpsTopic) {
             const id = this.props.fisherman._id;
-            
+
             this.setState({ socketGpsTopic: id });
         }
 
         if (this.props.gpsData != this.state.gpsData) {
+            
             const gps = this.props.gpsData;
+            let gpsArray = (gps || []).map((d) => [parseFloat(d.lat), parseFloat(d.lng)]);
 
-            if (gps.length < 2) {
-                gps.push({
-                    lat: 14.5833,
-                    lng: 121.0000
-                });
-            }
+            console.log("gps data component update -> ", gpsArray);
 
-            this.setState({ gpsData: gps });
+            this.setState({ gpsData: gps, realTimeGps: gpsArray, initPos: gpsArray[0] });
         }
     }
 
@@ -86,9 +86,13 @@ class MapPage extends Component {
 
         this.socket.on(`plot_gps`, (data) => {
             if (data.id == this.state.socketGpsTopic) {
-                console.log("data -> ", data);
+                const gps = data.gps;
 
-                this.setState({ gpsData: data.gps });
+                let gpsArray = (gps || []).map((d) => [parseFloat(d.lat), parseFloat(d.lng)]);
+
+                console.log("gps data inside socket -> ", gpsArray);
+
+                this.setState({ realTimeGps: gpsArray });
             }
         });
     }
@@ -121,7 +125,12 @@ class MapPage extends Component {
     }
 
     changeMovementCheck = (e) => {
-        this.setState({ followMovement: e.target.checked });
+        const points = this.state.gpsData[this.state.gpsData.length - 1];
+
+        this.setState({ 
+            followMovement: e.target.checked, 
+            gpsLastPoint: points
+        });
     }
 
     increaseZoom = () => {
@@ -140,13 +149,24 @@ class MapPage extends Component {
 
     render() {
 
-        const initPos = [
-            parseFloat(this.state.gpsData[0]?.lat),
-            parseFloat(this.state.gpsData[0]?.lng)]
+        // const initPos = [
+        //     parseFloat(this.state.gpsData[0]?.lat),
+        //     parseFloat(this.state.gpsData[0]?.lng)]
 
-        const position = [
-            parseFloat(this.state.gpsData[this.state.gpsData.length - 1]?.lat),
-            parseFloat(this.state.gpsData[this.state.gpsData.length - 1]?.lng)];
+        // const position = [
+        //     parseFloat(this.state.gpsData[this.state.gpsData.length - 1]?.lat),
+        //     parseFloat(this.state.gpsData[this.state.gpsData.length - 1]?.lng)];
+
+        const posLen = this.state.realTimeGps.length;
+        let position = [0, 0];
+
+        if (posLen > 0) {
+            position = this.state.realTimeGps[posLen - 1];
+        }
+
+        // console.log("poslen -> ", posLen);
+        // console.log("position -> ", position);
+        // console.log("init pos -> ", this.state.initPos);
 
         return (
             <div className="container-fluid" style={{
@@ -169,23 +189,23 @@ class MapPage extends Component {
                             </button>
 
                             <div className="btn-group mx-1" role="group" aria-label="Basic example">
-                                <button 
+                                <button
                                     type="button"
-                                    onClick={this.decreaseZoom} 
-                                    className="btn btn-dark"><IoIosRemove/></button>
-                                <button 
+                                    onClick={this.decreaseZoom}
+                                    className="btn btn-dark"><IoIosRemove /></button>
+                                <button
                                     type="button"
                                     onClick={this.increaseZoom}
-                                    className="btn btn-dark"><IoIosAdd/></button>
+                                    className="btn btn-dark"><IoIosAdd /></button>
                             </div>
 
                             <button type="button"
                                 className="btn btn-sm btn-info mx-1"
                                 onClick={this.sendHandler}>socket-test</button>
-                            <button type="button"
+                            {/* <button type="button"
                                 className="btn btn-sm btn-primary mx-1"
-                                onClick={this.testMove}>move-test</button>
-                            
+                                onClick={this.testMove}>move-test</button> */}
+
                             <button type="button"
                                 className="btn btn-sm btn-info mx-1"
                                 onClick={this.showFishermanInfoHandler}>Show Info</button>
@@ -209,19 +229,19 @@ class MapPage extends Component {
 
                 {
                     this.state.showFishermanInfo &&
-                        <FishermanInfo 
-                            fisherman={this.props.fisherman}
-                            currentLoc={position}
-                            onClose={() => {
-                                this.setState({ showFishermanInfo: false })
-                            }} 
-                        />
+                    <FishermanInfo
+                        fisherman={this.props.fisherman}
+                        currentLoc={position}
+                        onClose={() => {
+                            this.setState({ showFishermanInfo: false })
+                        }}
+                    />
                 }
-                
+
                 <Map
                     style={{ height: "100%", width: "100%" }}
                     center={
-                        this.state.followMovement ? position : initPos
+                        this.state.followMovement ? position : this.state.gpsLastPoint
                     }
                     zoom={this.state.zoom}
                     zoomControl={false}
@@ -231,7 +251,7 @@ class MapPage extends Component {
                         attribution="&copy; <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors"
                     />
 
-                    {
+                    {/*
                             (this.state.gpsData || []).map((points, key) => {
 
                                 let from = { lat: parseFloat(position[0]), lng: parseFloat(position[1]) };
@@ -257,11 +277,49 @@ class MapPage extends Component {
                                     ]} color={'red'} />
                                 )
                             })
-                    }
+                    */}
+
+                    {/*<Polyline key={12} positions={[
+                        [8.545193, 124.565490],
+                        [8.545172, 124.565490],
+                        [8.545184, 124.565490],
+                        [8.545192, 124.565500],
+                        [8.545187, 124.565510],
+                        [8.545174, 124.565510],
+                        [8.545176, 124.565510],
+                        [8.545180, 124.565510],
+                        [8.545181, 124.565490],
+                        [8.545180, 124.565500],
+                        [8.545180, 124.565510],
+                        [8.545181, 124.565500],
+                        [8.545177, 124.565510],
+                        [8.545177, 124.565510],
+                        [8.545174, 124.565510],
+                        [8.545172, 124.565520],
+                        [8.545170, 124.565520],
+                        [8.545151, 124.565430],
+                        [8.545141, 124.565400],
+                        [8.546304, 124.563900],
+                        [8.546509, 124.563810],
+                        [8.546708, 124.563740],
+                        [8.546842, 124.563690],
+                        [8.546924, 124.563680],
+                        [8.546967, 124.563680],
+                        [8.546993, 124.563690],
+                        [8.547014, 124.563680],
+                        [8.547031, 124.563680],
+                        [8.547167, 124.563710],
+                        [8.547471, 124.563740],
+                        [8.547782, 124.563790],
+                    ]} color={'red'} /> */}
+
+                    <Polyline key={13} positions={this.state.realTimeGps} color={'red'} />
+
+
 
                     <Marker
                         position={
-                            [this.state.gpsData[0]?.lat, this.state.gpsData[0]?.lng]
+                            this.state.initPos ? this.state.initPos : [0, 0]
                         }
                         icon={redIcon}
                     >
@@ -270,15 +328,14 @@ class MapPage extends Component {
 
                     <Marker
                         position={
-                            [
-                                this.state.gpsData[this.state.gpsData.length - 1]?.lat,
-                                this.state.gpsData[this.state.gpsData.length - 1]?.lng
-                            ]
+                            position
                         }
                         icon={redIcon}
                     >
                         <Popup>Last Position <br /></Popup>
                     </Marker>
+
+
                 </Map>
             </div>
         )

@@ -98,6 +98,7 @@ exports.saveEspGpsData = async (req, res, next) => {
         if (!fisherman) {
             next({ status: 500 });
         } else {
+            
             await gpsPointsModel.create({
                 fisherman_id: fisherman.id,
                 lat: lat,
