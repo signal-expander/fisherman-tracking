@@ -24,6 +24,8 @@ const globalErrHandler = require('./controllers/errorController');
 const AppError = require('./utils/appError');
 const fishermanController = require('./controllers/fishermanController');
 
+
+
 // Allow Cross-Origin requests
 app.use(cors());
 
@@ -52,6 +54,7 @@ app.use(cors());
 // Prevent parameter pollution
 // app.use(hpp());
 
+app.use(express.static('client/build'));
 
 // Routes
 app.use('/api/v1/users', userRoutes);
