@@ -7,6 +7,7 @@ const hpp = require('hpp');
 const cors = require('cors');
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
+const path = require('path');
 
 const app = express();
 const http = require('http').createServer(app);
@@ -114,6 +115,11 @@ io.use(function (socket, next) {
 
 });
 
+
+// handle static assets
+app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'))
+});
 
 
 // handle undefined Routes
