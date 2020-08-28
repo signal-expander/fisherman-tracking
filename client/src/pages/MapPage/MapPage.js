@@ -13,7 +13,7 @@ import { timers } from 'jquery';
 const redIcon = L.icon({
     iconUrl: Red,
     iconSize: [70, 60],
-    iconAnchor: [22, 94],
+    iconAnchor: [17, 60],
     shadowAnchor: [4, 62],
     popupAnchor: [-3, -76]
 })

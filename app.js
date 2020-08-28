@@ -65,7 +65,6 @@ app.get('/api/v1/esp/save-gps', (req, res) => {
     fishermanController.saveEspGpsData(req, res, (params) => {
         if (params.status === 500)
             return res.status(500).send("failed");
-
         io.emit(`plot_gps`, params);
         res.status(200).send("success");
     });

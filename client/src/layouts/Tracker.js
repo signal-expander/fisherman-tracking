@@ -121,9 +121,9 @@ class Tracker extends Component {
             <>
                 <div className="wrapper">
                     <nav id="sidebar">
-                        <div className="sidebar-header">
-                          <a className="navbar-brand" href="#">
-                            <img src={Logo} width="200" height="50" className="d-inline-block align-top" alt="" loading="lazy"/>
+                        <div className="sidebar-header text-center" style={{ marginRight: "0px" }}>
+                          <a className="navbar-brand" href="/" style={{ marginRight: "0px" }}>
+                            <img src={Logo} width="200" className="d-inline-block align-top" alt="" loading="lazy"/>
                           </a>                            
                           <hr />
                             <button 
@@ -140,9 +140,9 @@ class Tracker extends Component {
                             {
                                 (this.state.fishermen || []).map((data) =>
                                     <li>
-                                        <a href={`#${data.id_number}`} onClick={() => this.setFishermanGpsData(data)}>
+                                        <a href={`#${data.id_number}`} className="text-dark" onClick={() => this.setFishermanGpsData(data)}>
                                             { data.name } <br/>
-                                            <small className="text-warning">&nbsp;ID Number: { data.id_number } </small>
+                                            <small className="text-primary">&nbsp;ID Number: { data.id_number } </small>
                                         </a>
                                     </li>
                                 )

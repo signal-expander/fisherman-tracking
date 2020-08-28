@@ -4,13 +4,13 @@
 }
 
 #sidebar.active {
-    margin-left: -250px;
+    margin-left: -280px;
 }
 
 
 @media (max-width: 768px) {
     #sidebar {
-        margin-left: -250px;
+        margin-left: -280px;
     }
     #sidebar.active {
         margin-left: 0;
@@ -39,8 +39,8 @@ a, a:hover, a:focus {
     color: #fff;
     height: 100vh;
     transition: all 0.3s;
-    min-width: 250px;
-    max-width: 250px;
+    min-width: 280px;
+    max-width: 280px;
     min-height: 100vh;
     overflow: scroll;
 }
