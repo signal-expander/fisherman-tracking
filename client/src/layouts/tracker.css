@@ -35,7 +35,7 @@ a, a:hover, a:focus {
 }
 
 #sidebar {
-    background: #494D5F;
+    background: #ffefe0;
     color: #fff;
     height: 100vh;
     transition: all 0.3s;
@@ -47,7 +47,7 @@ a, a:hover, a:focus {
 
 #sidebar .sidebar-header {
     padding: 20px;
-    background: #494D5F;
+    background: #ffefe0;
 }
 
 #sidebar ul li{

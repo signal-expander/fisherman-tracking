@@ -4,6 +4,7 @@ import './tracker.css';
 import $, { data, timers } from "jquery";
 import { fishermenService } from '../services';
 import { ToastComponent, Modal } from '../components';
+import Logo from '../pages/MapPage/icons/logo.png';
 
 $(document).ready(function () {
     $('#sidebarCollapse').on('click', function () {
@@ -121,8 +122,10 @@ class Tracker extends Component {
                 <div className="wrapper">
                     <nav id="sidebar">
                         <div className="sidebar-header">
-                            <h3>Dashboard</h3>
-                            <hr />
+                          <a className="navbar-brand" href="#">
+                            <img src={Logo} width="200" height="50" className="d-inline-block align-top" alt="" loading="lazy"/>
+                          </a>                            
+                          <hr />
                             <button 
                                 type="button"
                                 className="btn btn-sm btn-info"

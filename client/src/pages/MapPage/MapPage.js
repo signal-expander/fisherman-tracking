@@ -1,7 +1,7 @@
 import React, { createRef, Component } from 'react';
 import L from 'leaflet';
 import { Map, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
-import leafRed from './icons/leaf-red.png';
+import Red from './icons/red.png';
 import leafShadow from './icons/leaf-shadow.png';
 import openSocket from 'socket.io-client';
 import LeafletReactTrackPlayer from "leaflet-react-track-player";
@@ -11,10 +11,8 @@ import { FishermanInfo } from '../../components';
 import { timers } from 'jquery';
 
 const redIcon = L.icon({
-    iconUrl: leafRed,
-    shadowUrl: leafShadow,
-    iconSize: [38, 95],
-    shadowSize: [50, 64],
+    iconUrl: Red,
+    iconSize: [70, 60],
     iconAnchor: [22, 94],
     shadowAnchor: [4, 62],
     popupAnchor: [-3, -76]
